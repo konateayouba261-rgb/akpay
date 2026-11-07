@@ -1,0 +1,419 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>AK Pay</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Concept: application mobile en colonne unique, fond vert profond pour l'accueil, cartes blanches, bouton vert plein. Ambre pour les accents. */
+:root{
+  --brand:#0B7A55; --brand-deep:#064E3B; --brand-soft:#DDF3E8; --accent:#F59E0B;
+  --bg:#F4F8F6; --card:#FFFFFF; --fg:#14201B; --muted:#52645C; --line:#D5E2DB; --field:#E6EEEA;
+  --danger:#B42318; --on-brand:#FFFFFF; --shadow:rgba(6,78,59,.14);
+  --font:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --brand:#2BB885; --brand-deep:#052E23; --brand-soft:#16352B; --accent:#F5A623;
+    --bg:#0C1511; --card:#13221C; --fg:#E8F3EE; --muted:#9DB3A9; --line:#26382F; --field:#1A2C25;
+    --danger:#FF8A80; --on-brand:#04251B; --shadow:rgba(0,0,0,.45); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --brand:#2BB885; --brand-deep:#052E23; --brand-soft:#16352B; --accent:#F5A623;
+  --bg:#0C1511; --card:#13221C; --fg:#E8F3EE; --muted:#9DB3A9; --line:#26382F; --field:#1A2C25;
+  --danger:#FF8A80; --on-brand:#04251B; --shadow:rgba(0,0,0,.45); color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.45;
+  padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px))}
+button,input{font:inherit;color:inherit}
+.app{max-width:430px;margin:0 auto;height:100%;position:relative;background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
+@media (min-width:431px){.app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+#screen{flex:1;min-height:0;display:flex;flex-direction:column}
+.scroll{flex:1;min-height:0;overflow-y:auto;padding:8px max(16px,env(safe-area-inset-left,0px)) 24px max(16px,env(safe-area-inset-right,0px))}
+.foot{padding:12px max(16px,env(safe-area-inset-left,0px)) 16px max(16px,env(safe-area-inset-right,0px))}
+.back{display:inline-flex;align-items:center;gap:2px;min-height:44px;padding:0 8px 0 0;border:0;background:none;color:var(--muted);cursor:pointer;font-size:15px}
+h1{font-size:26px;line-height:1.2;letter-spacing:-.02em;margin:8px 0 6px;font-weight:800;text-wrap:balance}
+.sub{margin:0 0 20px;color:var(--muted);font-size:14px}
+.btn{width:100%;height:52px;border:0;border-radius:14px;background:var(--brand);color:var(--on-brand);font-weight:700;font-size:16px;cursor:pointer}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn:focus-visible,.row:focus-visible,.tab:focus-visible,.act:focus-visible,.back:focus-visible,.cty:focus-visible,.boxes:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--fg)}
+label.lb{display:block;font-weight:600;font-size:14px;margin:0 0 6px}
+.in{width:100%;height:54px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);padding:0 16px;font-size:17px}
+.in:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.fld{margin-bottom:14px}
+.err{color:var(--danger);font-size:13px;margin-top:6px;min-height:0}
+.pick{height:56px;border-radius:14px;background:var(--field);display:flex;align-items:center;gap:12px;padding:0 16px;margin-bottom:12px}
+.bdg{flex:none;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:var(--brand-soft);color:var(--brand);font-weight:800}
+.phone-row{display:flex;gap:10px}
+.dial{height:54px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);padding:0 14px;display:flex;align-items:center;color:var(--muted);font-size:17px}
+.boxes{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;border-radius:14px}
+.box{height:60px;border-radius:12px;background:var(--card);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700}
+.box.on{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.boxes input{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;cursor:text}
+.hint{font-size:13px;color:var(--muted);margin-top:14px}
+.hero{background:var(--brand-deep);color:#fff;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-left,0px)) 28px max(16px,env(safe-area-inset-right,0px));position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-70px;width:220px;height:220px;border-radius:50%;background:var(--brand);opacity:.35}
+.hero>*{position:relative;z-index:1}
+.chip{display:inline-flex;align-items:center;gap:10px;padding:5px 14px 5px 5px;border-radius:999px;background:rgba(255,255,255,.16);font-weight:600}
+.hello{font-size:14px;opacity:.9;margin-top:26px}
+.name{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1.15}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.act{height:56px;border-radius:16px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.14);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.act.solid{background:#fff;color:var(--brand-deep);border-color:#fff}
+.card{background:var(--card);border-radius:20px;padding:18px;box-shadow:0 8px 24px var(--shadow);display:flex;gap:14px;align-items:center}
+.sec{display:flex;justify-content:space-between;align-items:center;margin:24px 0 12px;font-weight:800;font-size:16px}
+.sec span{color:var(--brand);font-weight:600;font-size:14px}
+.empty{text-align:center;padding:20px 0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.tabbar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;padding:6px;border-radius:999px;background:var(--card);box-shadow:0 12px 32px var(--shadow);border:1px solid var(--line)}
+.tab{min-width:92px;height:52px;border:0;border-radius:999px;background:transparent;color:var(--muted);font-size:12px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+.tab[aria-current="page"]{background:var(--brand-soft);color:var(--brand)}
+.row{width:100%;min-height:72px;border:0;border-radius:18px;background:var(--card);box-shadow:0 6px 18px var(--shadow);display:flex;align-items:center;gap:14px;padding:12px 16px;margin-bottom:12px;text-align:left;cursor:pointer}
+.row b{font-size:16px;display:block}.row small{color:var(--muted);font-size:13px}
+.list{background:var(--card);border-radius:18px;overflow:hidden;box-shadow:0 6px 18px var(--shadow)}
+.cty{width:100%;height:56px;border:0;border-bottom:1px solid var(--line);background:var(--card);display:flex;align-items:center;gap:12px;padding:0 14px;cursor:pointer;text-align:left;font-weight:600}
+.cty:last-child{border-bottom:0}
+.cty[aria-checked="true"]{background:var(--brand-soft)}
+.radio{margin-left:auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--muted)}
+.cty[aria-checked="true"] .radio{border:6px solid var(--brand)}
+.sum{background:var(--card);border-radius:18px;padding:6px 16px;margin-bottom:20px}
+.sum div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-variant-numeric:tabular-nums}
+.sum div span:first-child{color:var(--muted)}
+.fee{background:var(--brand-soft);border-radius:14px;padding:14px;font-variant-numeric:tabular-nums}
+.ok{display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center;flex:1;gap:10px;padding:24px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:-.02em;color:var(--brand);margin:20px 0 28px}
+.tx{margin-bottom:10px}
+.app:has(.hero) .theme{color:#fff!important}
+.theme{position:absolute;top:calc(8px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));z-index:5}
+.dlg{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:20;padding:16px max(16px,env(safe-area-inset-left,0px)) calc(16px + env(safe-area-inset-bottom,0px))}
+.dp{width:100%;background:var(--card);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.dp p{margin:0}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+.toast{background:var(--danger);color:#fff;border-radius:14px;padding:12px 14px;font-weight:600;font-size:14px;margin-bottom:12px}
+[data-theme="dark"] .toast{color:#1a0705}
+.sw{display:flex;align-items:center;gap:12px;min-height:44px;font-weight:600;cursor:pointer}
+.sw input{width:22px;height:22px;accent-color:var(--brand)}
+@media (prefers-reduced-motion:no-preference){.scroll,.ok{animation:in .25s ease-out}@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}}
+</style>
+
+<div class="app"><main id="screen" aria-live="polite"></main></div>
+
+<script>
+(function(){
+const NAME='AK Pay';
+const HOME={code:'CI',name:"Côte d'Ivoire",dial:'+225'};
+const COUNTRIES=[['BJ','Bénin','+229'],['SN','Sénégal','+221'],['TG','Togo','+228'],['ML','Mali','+223'],['NE','Niger','+227'],['BF','Burkina Faso','+226'],['GA','Gabon','+241'],['CM','Cameroun','+237']].map(c=>({code:c[0],name:c[1],dial:c[2]}));
+const NETWORKS=[['Wave','#CFE3FF'],['Orange','#FFD9B8'],['MTN','#FFEB99'],['Moov','#CDE8FF'],['Celpaid','#D3F2DE']].map(n=>({name:n[0],tint:n[1]}));
+const FEE=0.015, MIN=500, MAX=200000, MAX_V=1000000, TEST_OTP='12345';
+const fcfa=n=>Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,' ')+' FCFA';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ic={
+ back:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>',
+ next:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>',
+ swap:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg>',
+ globe:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/></svg>',
+ gift:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M12 8c-2-4-6-3-5 0 .5 1 3 1 5 0zM12 8c2-4 6-3 5 0-.5 1-3 1-5 0z"/></svg>',
+ shield:'<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>',
+ key:'',pulse:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>',
+ check:'<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+ logo:'<svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="12" fill="#0B7A55"/><path d="M12 14h14l-3.5-3.5M28 26H14l3.5 3.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="29" cy="12" r="3" fill="#F59E0B"/></svg>'
+};
+const S={stack:['phone'],phone:'',otp:'',profile:{ln:'',fn:'',em:'',bd:''},pin:'',pin1:'',network:null,dest:null,rphone:'',rname:'',amount:0,tx:[],tab:'home',tmr:null,verified:false,gifts:[],sel:0,gamt:0,kyc:{doc:'',num:'',f1:false,f2:false},done:{title:'',text:'',tab:'home'}};
+const limit=()=>S.verified?MAX_V:MAX;
+const KEY='akpay_v1';
+const load=()=>{try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d&&d.pin1){Object.assign(S,{phone:d.phone,profile:d.profile,pin1:d.pin1,tx:d.tx||[],verified:!!d.verified,gifts:d.gifts||[]});return true}}catch(e){}return false};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({phone:S.phone,profile:S.profile,pin1:S.pin1,tx:S.tx,verified:S.verified,gifts:S.gifts}))}catch(e){}};
+const wipe=()=>{try{localStorage.removeItem(KEY)}catch(e){}};
+const root=document.getElementById('screen');
+const cur=()=>S.stack[S.stack.length-1];
+const go=n=>{S.stack.push(n);show()};
+const back=()=>{if(S.stack.length>1){S.stack.pop();show()}};
+const reset=n=>{S.stack=[n];show()};
+const fee=a=>Math.round(a*FEE);
+const backBtn=()=>`<button class="back" data-back aria-label="Retour">${ic.back}Retour</button>`;
+const foot=(label,extra='')=>`<div class="foot"><button class="btn" data-next disabled>${label}</button></div>`;
+const boxes=(id,secret)=>`<div class="boxes" data-boxes="${id}">${[0,1,2,3,4].map(i=>`<div class="box" data-i="${i}"></div>`).join('')}<input id="${id}" inputmode="numeric" autocomplete="one-time-code" maxlength="5" aria-label="Code à 5 chiffres" data-secret="${secret?1:0}"></div>`;
+function paintBoxes(id,val){
+  const w=root.querySelector(`[data-boxes="${id}"]`);if(!w)return;
+  const secret=w.querySelector('input').dataset.secret==='1';
+  w.querySelectorAll('.box').forEach((b,i)=>{b.textContent=val[i]?(secret?'•':val[i]):'';b.classList.toggle('on',i===val.length&&document.activeElement===w.querySelector('input'))});
+}
+function bindBoxes(id,get,set,after){
+  const inp=root.querySelector('#'+id);if(!inp)return;
+  inp.value=get();paintBoxes(id,get());
+  inp.addEventListener('input',()=>{const v=inp.value.replace(/\D/g,'').slice(0,5);inp.value=v;set(v);paintBoxes(id,v);after&&after()});
+  inp.addEventListener('focus',()=>paintBoxes(id,get()));inp.addEventListener('blur',()=>paintBoxes(id,get()));
+  setTimeout(()=>inp.focus({preventScroll:true}),30);
+}
+const setNext=ok=>{const b=root.querySelector('[data-next]');if(b)b.disabled=!ok};
+const setErr=t=>{const e=root.querySelector('.err');if(e)e.textContent=t||''};
+const fmtPhone=t=>t.replace(/\D/g,'').slice(0,10).replace(/(\d{2})(?=\d)/g,'$1 ').trim();
+const fmtBirth=t=>{const d=t.replace(/\D/g,'').slice(0,8);return[d.slice(0,2),d.slice(2,4),d.slice(4)].filter(Boolean).join('/')};
+
+const emptyBlock=`<div class="empty"><span class="bdg" style="width:64px;height:64px">${ic.pulse}</span><b style="font-size:16px;margin-top:8px">Pas d'activité récente</b><span style="color:var(--muted);max-width:260px">Effectuez un premier transfert pour voir vos activités ici.</span></div>`;
+const txCard=(t,i)=>`<button class="card tx" data-tx="${i}" style="width:100%;border:0;text-align:left;cursor:pointer;color:inherit"><span class="bdg" style="width:40px;height:40px;font-size:13px">${esc(t.cc)}</span><div style="flex:1;min-width:0"><b style="overflow-wrap:anywhere">${esc(t.to)}</b><div style="font-size:12px;color:var(--muted)">${esc(t.date)} · ${esc(t.net)}</div></div><b style="font-variant-numeric:tabular-nums;white-space:nowrap">-${fcfa(t.amount)}</b></button>`;
+const CONTACTS=[['Awa Diallo','07 12 34 56 78'],['Moussa Traoré','05 98 76 54 32'],['Fatou Koné','01 23 45 67 89'],['Ibrahim Ouattara','07 65 43 21 09']];
+const LMIN=250,LMAX=300000;
+const lmax=()=>S.verified?MAX_V:LMAX;
+const netRow=(n,i,sub)=>`<button class="row" data-net="${i}"><span class="bdg" style="width:44px;height:44px;background:${n.tint};color:#17132B">${n.name[0]}</span><span style="flex:1"><b>${n.name}</b><small>${sub}</small></span>${ic.next}</button>`;
+const lcalc=a=>{const f=fee(a);return S.pf?{recv:a,debit:a+f,f}:{recv:a-f,debit:a,f}};
+const GIFTS=[5000,10000,25000,50000];
+const bindTx=()=>root.querySelectorAll('[data-tx]').forEach(b=>b.onclick=()=>{S.sel=+b.dataset.tx;go('receipt')});
+const bindGo=()=>root.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+const twoTap=(btn,label,fn)=>{let armed=false;const o=btn.textContent;btn.onclick=()=>{if(!armed){armed=true;btn.textContent=label;setTimeout(()=>{armed=false;btn.textContent=o},4000)}else fn()}};
+const resetAll=()=>{Object.assign(S,{phone:'',otp:'',profile:{ln:'',fn:'',em:'',bd:''},pin:'',pin1:'',tx:[],gifts:[],verified:false,network:null,dest:null,tab:'home',rname:'',rphone:'',amount:0});wipe()};
+const genCode=()=>{const r=()=>Math.random().toString(36).slice(2,6).toUpperCase().padEnd(4,'X');return 'AKP-'+r()+'-'+r()};
+const screens={
+phone:{
+  render:()=>`<div class="scroll"><div class="logo">${ic.logo}${NAME}</div>
+   <h1>Entrez votre numéro</h1><p class="sub">Nous vous enverrons un code de vérification par SMS.</p>
+   <div class="pick"><span class="bdg" style="width:28px;height:28px;font-size:11px">${HOME.code}</span>${HOME.name}</div>
+   <div class="phone-row"><div class="dial">${HOME.dial}</div><input class="in" id="tel" inputmode="numeric" autocomplete="tel-national" placeholder="07 00 00 00 00" aria-label="Numéro de téléphone"></div>
+   <p class="hint">En continuant, vous acceptez la politique de confidentialité d'${NAME}.</p></div>${foot('Suivant')}`,
+  bind(){const i=root.querySelector('#tel');i.value=S.phone;
+    i.addEventListener('input',()=>{S.phone=fmtPhone(i.value);i.value=S.phone;setNext(S.phone.replace(/\s/g,'').length===10)});setNext(S.phone.replace(/\s/g,'').length===10)},
+  next(){go('otp')}
+},
+otp:{
+  render:()=>`<div class="scroll">${backBtn()}<h1>Entrez le code reçu par SMS</h1><p class="sub">Envoyé au ${HOME.dial} ${esc(S.phone)}</p>
+   ${boxes('otp')}<div class="err" role="alert"></div><p class="hint" id="tm"></p><p class="hint">Mode test : le code est <b>${TEST_OTP}</b>.</p></div>${foot('Vérifier')}`,
+  bind(){S.otp='';let t=30;const tm=root.querySelector('#tm');
+    const draw=()=>{tm.innerHTML=t>0?`Je n'ai pas reçu de code <b>00:${String(t).padStart(2,'0')}</b>`:`<button class="back" style="color:var(--brand);font-weight:700" id="rs">Renvoyer le code</button>`};
+    draw();clearInterval(S.tmr);S.tmr=setInterval(()=>{if(t>0){t--;draw()}},1000);
+    tm.addEventListener('click',e=>{if(e.target.id==='rs'){t=30;draw()}});
+    bindBoxes('otp',()=>S.otp,v=>S.otp=v,()=>{setErr('');setNext(S.otp.length===5)})},
+  next(){if(S.otp===TEST_OTP)go('profile');else setErr('Code incorrect. En mode test, utilisez '+TEST_OTP+'.')}
+},
+profile:{
+  render:()=>`<div class="scroll">${backBtn()}<h1>Informations personnelles</h1><p class="sub">Ces informations servent à créer votre compte.</p>
+   <div class="fld"><label class="lb" for="ln">Nom</label><input class="in" id="ln" autocomplete="family-name" placeholder="Votre nom"></div>
+   <div class="fld"><label class="lb" for="fn">Prénom</label><input class="in" id="fn" autocomplete="given-name" placeholder="Votre prénom"></div>
+   <div class="fld"><label class="lb" for="em">Adresse e-mail</label><input class="in" id="em" type="email" autocomplete="email" placeholder="Votre adresse e-mail"><div class="err" id="eem"></div></div>
+   <div class="fld"><label class="lb" for="bd">Quelle est votre date de naissance ?</label><input class="in" id="bd" inputmode="numeric" placeholder="JJ/MM/AAAA"></div></div>${foot('Suivant')}`,
+  bind(){const P=S.profile,m={ln:'ln',fn:'fn',em:'em',bd:'bd'};
+    const ok=()=>{const e=/^\S+@\S+\.\S+$/.test(P.em),b=/^\d{2}\/\d{2}\/\d{4}$/.test(P.bd);root.querySelector('#eem').textContent=P.em&&!e?'Adresse e-mail invalide':'';setNext(P.ln.trim()&&P.fn.trim()&&e&&b)};
+    Object.keys(m).forEach(k=>{const i=root.querySelector('#'+k);i.value=P[k];i.addEventListener('input',()=>{if(k==='bd')i.value=fmtBirth(i.value);P[k]=i.value;ok()})});ok()},
+  next(){go('pin')}
+},
+pin:{
+  render:()=>{const c=S.pin1.length===5;return `<div class="scroll">${backBtn()}<h1>${c?'Confirmez votre code PIN':'Créer un code PIN'}</h1>
+   <p class="sub">${c?'Saisissez-le une seconde fois pour confirmer.':'Protégez votre compte avec un code PIN à 5 chiffres.'}</p>${boxes('pn',true)}<div class="err" role="alert"></div></div>${foot(c?'Confirmer':'Continuer')}`},
+  bind(){S.pin='';bindBoxes('pn',()=>S.pin,v=>S.pin=v,()=>{setErr('');setNext(S.pin.length===5)})},
+  next(){if(S.pin1.length<5){S.pin1=S.pin;S.pin='';show();return}
+    if(S.pin!==S.pin1){S.pin1='';S.pin='';show();setTimeout(()=>setErr('Les codes ne correspondent pas. Recommencez.'),0);return}
+    save();reset('home')}
+},
+home:{
+  render(){const P=S.profile,ini=((P.fn[0]||'')+(P.ln[0]||'')).toUpperCase()||'AK';let body;
+   if(S.tab==='home'){
+    body=`<div class="hero"><button class="chip" data-go="me" aria-label="Mon compte" style="border:0;color:#fff;cursor:pointer;font-size:15px"><span class="bdg" style="width:34px;height:34px;font-size:13px">${esc(ini)}</span>${esc(P.fn||'Moi')}</button>
+    <div class="hello">Bon retour</div><div class="name">Salut, ${esc(P.fn||'vous')}</div>
+    <div class="acts"><button class="act solid" data-go="lnet1">${ic.swap}Transfert local</button><button class="act" data-go="network">${ic.globe}International</button></div></div>
+    <div class="scroll" style="padding-bottom:120px"><div class="card" style="margin-top:-8px"><div style="flex:1;min-width:0"><b style="font-size:16px">${S.verified?'Identité vérifiée':'Augmentez votre limite'}</b>
+     <p style="margin:4px 0 8px;color:var(--muted);font-size:13px">${S.verified?'Vous pouvez envoyer jusqu\'à ':'Sans vérification, vous pouvez envoyer jusqu\'à '}${fcfa(limit())}.</p>${S.verified?'':'<button class="back" data-go="kyc" style="color:var(--brand);font-size:13px;font-weight:700;text-decoration:underline;min-height:32px">Vérifier mon identité</button>'}</div>
+     <span class="bdg" style="width:64px;height:64px;border-radius:18px">${ic.shield}</span></div>
+     <div class="sec">Vos activités<button class="back" data-go="history" style="color:var(--brand);font-weight:600;font-size:14px;padding:0">Tout afficher</button></div>
+     ${S.tx.length?S.tx.slice(0,3).map(txCard).join(''):emptyBlock}</div>`;
+   }else{
+    body=`<div class="scroll" style="padding-bottom:120px;padding-top:calc(24px + env(safe-area-inset-top,0px))"><h1>GiftCard</h1><p class="sub">Offrez une carte cadeau à un proche. Elle est livrée sous forme de code à lui transmettre.</p>
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${GIFTS.map(g=>`<button class="row" data-g="${g}" style="margin:0;flex-direction:column;justify-content:center;min-height:92px;text-align:center;gap:4px"><span class="bdg" style="width:32px;height:32px">${ic.gift}</span><b>${fcfa(g)}</b></button>`).join('')}</div>
+     <div class="sec">Mes cartes</div>
+     ${S.gifts.length?S.gifts.map((g,i)=>`<div class="card tx" style="align-items:center"><div style="flex:1;min-width:0"><b>${fcfa(g.amt)}</b><div style="font-size:12px;color:var(--muted)">Pour ${esc(g.to)} · ${esc(g.date)}</div><div style="font-family:ui-monospace,monospace;font-size:15px;margin-top:4px;user-select:all">${esc(g.code)}</div></div><button class="btn ghost" data-copy="${esc(g.code)}" style="width:auto;height:44px;padding:0 14px;font-size:14px">Copier</button></div>`).join(''):'<p class="hint" style="margin-top:0">Aucune carte pour le moment.</p>'}</div>`;
+   }
+   return body+`<nav class="tabbar" aria-label="Navigation"><button class="tab" data-tab="home" ${S.tab==='home'?'aria-current="page"':''}>${ic.swap}Accueil</button><button class="tab" data-tab="gift" ${S.tab==='gift'?'aria-current="page"':''}>${ic.gift}GiftCard</button></nav>`},
+  bind(){root.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;show()});bindGo();bindTx();
+    root.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{S.gamt=+b.dataset.g;go('giftbuy')});
+    root.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{const c=b.dataset.copy;try{navigator.clipboard.writeText(c).then(()=>b.textContent='Copié',()=>b.textContent='Sélectionnez le code')}catch(e){b.textContent='Sélectionnez le code'}})}
+},
+network:{
+  render:()=>`<div class="scroll">${backBtn()}<h1>Quel réseau utilisez-vous ?</h1><p class="sub">Numéro débité : ${HOME.dial} ${esc(S.phone)}</p>
+   ${NETWORKS.map((n,i)=>`<button class="row" data-net="${i}"><span class="bdg" style="width:44px;height:44px;background:${n.tint};color:#17132B">${n.name[0]}</span><span style="flex:1"><b>${n.name}</b><small>Payer avec ${n.name}</small></span>${ic.next}</button>`).join('')}</div>`,
+  bind(){root.querySelectorAll('[data-net]').forEach(b=>b.onclick=()=>{S.network=NETWORKS[b.dataset.net];go('country')})}
+},
+country:{
+  render:()=>`<div class="scroll">${backBtn()}<h1>Sélectionnez le pays de destination</h1><p class="sub">Vers quel pays souhaitez-vous envoyer de l'argent ?</p>
+   <div class="fld"><input class="in" id="q" type="search" placeholder="Rechercher…" aria-label="Rechercher un pays"></div><div class="list" id="cl" role="radiogroup" aria-label="Pays"></div></div>${foot('Suivant')}`,
+  bind(){const l=root.querySelector('#cl'),q=root.querySelector('#q');
+    const draw=()=>{const f=q.value.trim().toLowerCase();const a=COUNTRIES.filter(c=>c.name.toLowerCase().includes(f));
+      l.innerHTML=a.map(c=>`<button class="cty" role="radio" aria-checked="${S.dest&&S.dest.code===c.code}" data-c="${c.code}"><span class="bdg" style="width:30px;height:30px;font-size:11px">${c.code}</span>${c.name}<span class="radio"></span></button>`).join('')||'<p style="padding:16px;margin:0;color:var(--muted)">Aucun pays trouvé.</p>';
+      setNext(!!S.dest)};
+    q.addEventListener('input',draw);l.addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(b){S.dest=COUNTRIES.find(c=>c.code===b.dataset.c);draw()}});draw()},
+  next(){go('recipient')}
+},
+recipient:{
+  render:()=>`<div class="scroll">${backBtn()}<h1>Qui reçoit l'argent ?</h1><p class="sub">Destinataire au ${esc(S.dest.name)}</p>
+   <div class="fld"><label class="lb" for="rn">Nom du destinataire</label><input class="in" id="rn" autocomplete="off" placeholder="Nom complet"></div>
+   <div class="fld"><label class="lb" for="rp">Numéro (${S.dest.dial})</label><input class="in" id="rp" inputmode="numeric" autocomplete="off" placeholder="Numéro de téléphone"></div></div>${foot('Suivant')}`,
+  bind(){const n=root.querySelector('#rn'),p=root.querySelector('#rp');n.value=S.rname;p.value=S.rphone;
+    const ok=()=>setNext(S.rname.trim().length>1&&S.rphone.replace(/\D/g,'').length>=8);
+    n.oninput=()=>{S.rname=n.value;ok()};p.oninput=()=>{p.value=p.value.replace(/[^\d ]/g,'');S.rphone=p.value;ok()};ok()},
+  next(){go('amount')}
+},
+amount:{
+  render:()=>`<div class="scroll">${backBtn()}<h1>Combien envoyer ?</h1><p class="sub">Envoi vers ${esc(S.dest.name)} avec ${esc(S.network.name)}</p>
+   <div class="fld"><label class="lb" for="am">Montant (FCFA)</label><input class="in" id="am" inputmode="numeric" placeholder="0" autocomplete="off"><div class="err" role="alert"></div></div><div id="fe"></div></div>${foot('Continuer')}`,
+  bind(){const i=root.querySelector('#am'),fe=root.querySelector('#fe');let raw=S.amount?String(S.amount):'';
+    const upd=()=>{const a=parseInt(raw||'0',10);i.value=raw?raw.replace(/\B(?=(\d{3})+(?!\d))/g,' '):'';
+      const low=raw!==''&&a<MIN,high=a>limit(),ok=a>=MIN&&!high;
+      setErr(low?'Minimum '+fcfa(MIN):high?'Limite d\'envoi : '+fcfa(limit()):'');
+      fe.innerHTML=ok?`<div class="fee"><div style="color:var(--muted)">Frais (1,5 %) : <b style="color:var(--fg)">${fcfa(fee(a))}</b></div><div style="color:var(--muted);margin-top:4px">Total à payer : <b style="color:var(--fg)">${fcfa(a+fee(a))}</b></div></div>`:'';
+      S.amount=ok?a:0;setNext(ok)};
+    i.addEventListener('input',()=>{raw=i.value.replace(/\D/g,'').slice(0,7);upd()});upd();setTimeout(()=>i.focus({preventScroll:true}),30)},
+  next(){go('confirm')}
+},
+confirm:{
+  render:()=>{const a=S.amount,f=fee(a);return `<div class="scroll">${backBtn()}<h1>Confirmez votre transfert</h1>
+   <div class="sum"><div><span>Réseau</span><b>${esc(S.network.name)}</b></div><div><span>Destination</span><b>${esc(S.dest.name)}</b></div>
+   <div><span>Destinataire</span><b>${esc(S.rname)}</b></div><div><span>Numéro</span><b>${S.dest.dial} ${esc(S.rphone)}</b></div>
+   <div><span>Montant</span><b>${fcfa(a)}</b></div><div><span>Frais</span><b>${fcfa(f)}</b></div><div><span>Total</span><b>${fcfa(a+f)}</b></div></div>
+   <label class="lb" for="cp">Entrez votre code PIN pour valider</label>${boxes('cp',true)}<div class="err" role="alert"></div></div>${foot('Payer')}`},
+  bind(){S.cp='';bindBoxes('cp',()=>S.cp,v=>S.cp=v,()=>{setErr('');setNext(S.cp.length===5)})},
+  next(){if(S.cp!==S.pin1){setErr('Code PIN incorrect.');return}
+    S.tx.unshift({cc:S.dest.code,to:`${S.rname} (${S.dest.dial} ${S.rphone})`,date:new Date().toLocaleDateString('fr-FR'),net:S.network.name,amount:S.amount,fee:fee(S.amount),ref:'AK'+Date.now().toString().slice(-8)});save();go('success')}
+},
+lnet1:{
+  render:()=>`<div class="scroll">${backBtn()}<h1>Depuis quel réseau débitez-vous de l'argent ?</h1><p class="sub">Choisissez le réseau de votre compte mobile money.</p>${NETWORKS.map((n,i)=>netRow(n,i,'Prélever depuis '+n.name)).join('')}</div>`,
+  bind(){root.querySelectorAll('[data-net]').forEach(b=>b.onclick=()=>{S.lsrc=NETWORKS[b.dataset.net];go('lnum')})}
+},
+lnum:{
+  render:()=>{const P=S.profile,ini=((P.fn[0]||'')+(P.ln[0]||'')).toUpperCase()||'AK';return `<div class="scroll">${backBtn()}<h1>Quel numéro souhaitez-vous débiter ?</h1><p class="sub">Compte ${esc(S.lsrc.name)}</p>
+   <button class="row" id="me"><span class="bdg" style="width:44px;height:44px">${esc(ini)}</span><span style="flex:1"><b>Moi</b><small>${HOME.dial} ${esc(S.phone)}</small></span>${ic.next}</button>
+   <button class="row" id="oth" aria-expanded="false"><span class="bdg" style="width:44px;height:44px;font-size:22px">+</span><span style="flex:1"><b>Utiliser un autre numéro</b></span></button>
+   <div id="ob" hidden class="phone-row"><div class="dial">${HOME.dial}</div><input class="in" id="on" inputmode="numeric" placeholder="07 00 00 00 00" aria-label="Autre numéro à débiter"></div></div>
+   <div class="foot" id="of" hidden><button class="btn" data-next disabled>Suivant</button></div>`},
+  bind(){const o=root.querySelector('#on');
+    root.querySelector('#me').onclick=()=>{S.debit=HOME.dial+' '+S.phone;go('lnet2')};
+    root.querySelector('#oth').onclick=e=>{root.querySelector('#ob').hidden=false;root.querySelector('#of').hidden=false;e.currentTarget.setAttribute('aria-expanded','true');o.focus()};
+    o.oninput=()=>{o.value=fmtPhone(o.value);setNext(o.value.replace(/\s/g,'').length===10)}},
+  next(){S.debit=HOME.dial+' '+root.querySelector('#on').value;go('lnet2')}
+},
+lnet2:{
+  render:()=>`<div class="scroll">${backBtn()}<h1>Vers quel réseau envoyez-vous l'argent ?</h1><p class="sub">Choisissez le réseau du bénéficiaire.</p><div id="tt" role="alert"></div>${NETWORKS.map((n,i)=>netRow(n,i,'Transférer vers '+n.name)).join('')}</div>`,
+  bind(){root.querySelectorAll('[data-net]').forEach(b=>b.onclick=()=>{const n=NETWORKS[b.dataset.net];
+    if(n.name===S.lsrc.name){const t=root.querySelector('#tt');t.innerHTML='<div class="toast">Impossible de sélectionner le même fournisseur.</div>';setTimeout(()=>{t.innerHTML=''},3500);return}
+    S.ldst=n;go('lben')})}
+},
+lben:{
+  render:()=>`<div class="scroll">${backBtn()}<h1>Qui est le bénéficiaire ?</h1><p class="sub">Compte ${esc(S.ldst.name)}</p>
+   <div class="fld"><input class="in" id="lq" type="search" placeholder="Nom, numéro de téléphone…" aria-label="Rechercher un contact"></div>
+   <label class="lb" for="lp">Entrer le numéro</label><div class="phone-row"><div class="dial">${HOME.dial}</div><input class="in" id="lp" inputmode="numeric" placeholder="00 00 00 00 00"></div>
+   <div class="sec" style="margin-top:22px">Contacts d'exemple</div><div id="lc"></div></div>${foot('Suivant')}`,
+  bind(){const q=root.querySelector('#lq'),lc=root.querySelector('#lc'),lp=root.querySelector('#lp');
+    const draw=()=>{const f=q.value.trim().toLowerCase().replace(/\s/g,'');const a=CONTACTS.filter(c=>(c[0]+c[1]).toLowerCase().replace(/\s/g,'').includes(f));
+      lc.innerHTML=a.map((c,i)=>`<button class="row" data-c="${CONTACTS.indexOf(c)}" style="min-height:64px"><span class="bdg" style="width:40px;height:40px;font-size:14px">${esc(c[0][0])}</span><span style="flex:1"><b style="font-size:15px">${esc(c[0])}</b><small>${esc(c[1])}</small></span>${ic.next}</button>`).join('')||'<p class="hint">Aucun contact trouvé.</p>'};
+    q.oninput=draw;draw();
+    lc.addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(b){const c=CONTACTS[b.dataset.c];S.rname=c[0];S.rphone=c[1];go('lamt')}});
+    lp.oninput=()=>{lp.value=fmtPhone(lp.value);setNext(lp.value.replace(/\s/g,'').length===10)}},
+  next(){S.rname='';S.rphone=root.querySelector('#lp').value;go('lamt')}
+},
+lamt:{
+  render:()=>`<div class="scroll">${backBtn()}<h1>Combien envoyez-vous ?</h1>
+   <p class="sub">${esc(S.lsrc.name)} → ${esc(S.ldst.name)}<br>Vous envoyez au ${esc(S.rphone)}${S.rname?' ('+esc(S.rname)+')':''}<br>Depuis le ${esc(S.debit)}</p>
+   <div class="fld"><label class="lb" for="la">Montant à envoyer (Fcfa)</label><input class="in" id="la" inputmode="numeric" placeholder="0" autocomplete="off"><div class="err" role="alert"></div></div>
+   <label class="sw"><input type="checkbox" id="pf"> Je paye les frais</label>
+   <p class="hint" style="margin-top:6px">NB : entrez un montant qui se termine par 0.<br>Montant min = ${fcfa(LMIN)}<br>Montant max = ${fcfa(lmax())}</p><div id="lt"></div></div>${foot('Continuer')}
+   <div class="dlg" id="dg" hidden><div class="dp" role="dialog" aria-modal="true" aria-labelledby="dgt"><b id="dgt" style="font-size:17px">Confirmer le transfert</b><p id="dgm"></p><p class="hint" style="margin:0">* Aucun remboursement ne sera possible.</p>
+    <label class="lb" for="lp2" style="margin-top:6px">Code PIN</label>${boxes('lp2',true)}<div class="err" id="derr" role="alert"></div>
+    <div class="two"><button class="btn ghost" id="cn">Annuler</button><button class="btn" id="go" disabled>Envoyer</button></div></div></div>`,
+  bind(){const i=root.querySelector('#la'),lt=root.querySelector('#lt'),pf=root.querySelector('#pf'),dg=root.querySelector('#dg');let raw=S.amount?String(S.amount):'';pf.checked=!!S.pf;
+    const upd=()=>{const a=parseInt(raw||'0',10);i.value=raw?raw.replace(/\B(?=(\d{3})+(?!\d))/g,' '):'';
+      let m='';if(raw!==''){if(a<LMIN)m='Minimum '+fcfa(LMIN);else if(a>lmax())m='Maximum '+fcfa(lmax());else if(a%10!==0)m='Le montant doit se terminer par 0.'}
+      setErr(m);const ok=a>=LMIN&&a<=lmax()&&a%10===0;S.amount=ok?a:0;
+      if(ok){const c=lcalc(a);lt.innerHTML=`<div class="fee"><div style="display:flex;justify-content:space-between;color:var(--muted)"><span>Correspondant recevra</span><b style="color:var(--fg)">${fcfa(c.recv)}</b></div><div style="display:flex;justify-content:space-between;color:var(--muted);margin-top:4px"><span>Frais</span><b style="color:var(--fg)">${fcfa(c.f)}</b></div><div style="display:flex;justify-content:space-between;margin-top:4px"><span style="color:var(--muted)">Montant à débiter</span><b style="color:var(--brand)">${fcfa(c.debit)}</b></div></div>`}else lt.innerHTML='';
+      setNext(ok)};
+    i.addEventListener('input',()=>{raw=i.value.replace(/\D/g,'').slice(0,7);upd()});pf.onchange=()=>{S.pf=pf.checked;upd()};upd();
+    S.cp='';const derr=root.querySelector('#derr'),go_=root.querySelector('#go');
+    root.querySelector('#cn').onclick=()=>{dg.hidden=true};
+    this.open=()=>{const c=lcalc(S.amount);root.querySelector('#dgm').textContent='Vous allez effectuer une transaction de '+fcfa(S.amount)+' du '+S.debit+' vers '+HOME.dial+' '+S.rphone+'.';S.cp='';dg.hidden=false;
+      bindBoxes('lp2',()=>S.cp,v=>S.cp=v,()=>{derr.textContent='';go_.disabled=S.cp.length!==5})};
+    go_.onclick=()=>{if(S.cp!==S.pin1){derr.textContent='Code PIN incorrect.';return}
+      const c=lcalc(S.amount),d=new Date().toLocaleDateString('fr-FR');
+      S.tx.unshift({cc:'CI',to:(S.rname||'Bénéficiaire')+' ('+S.rphone+')',date:d,net:S.lsrc.name+' → '+S.ldst.name,amount:c.debit,fee:c.f,ref:'AK'+Date.now().toString().slice(-8)});
+      save();S.done={title:'Transfert envoyé',text:fcfa(c.recv)+' envoyés à '+(S.rname||S.rphone)+'. Mode test : aucun argent réel n\'a été déplacé.',tab:'home'};S.amount=0;S.rname='';S.rphone='';S.pf=false;go('done')}},
+  next(){this.open()}
+},
+login:{
+  render:()=>`<div class="scroll"><div class="logo">${ic.logo}${NAME}</div><h1>Bon retour${S.profile.fn?', '+esc(S.profile.fn):''}</h1><p class="sub">Entrez votre code PIN pour vous connecter.</p>${boxes('lg',true)}<div class="err" role="alert"></div>
+   <button class="back" id="rst" style="margin-top:20px;color:var(--danger)">Ce n'est pas moi : effacer ce compte</button></div>${foot('Se connecter')}`,
+  bind(){S.cp='';bindBoxes('lg',()=>S.cp,v=>S.cp=v,()=>{setErr('');setNext(S.cp.length===5)});
+    twoTap(root.querySelector('#rst'),'Touchez encore pour confirmer',()=>{resetAll();reset('phone')})},
+  next(){if(S.cp===S.pin1){S.tab='home';reset('home')}else setErr('Code PIN incorrect.')}
+},
+history:{
+  render:()=>`<div class="scroll">${backBtn()}<h1>Vos activités</h1><p class="sub">${S.tx.length?S.tx.length+(S.tx.length>1?' opérations':' opération'):'Aucune opération pour le moment.'}</p>${S.tx.length?S.tx.map(txCard).join(''):emptyBlock}</div>`,
+  bind(){bindTx()}
+},
+receipt:{
+  render:()=>{const t=S.tx[S.sel];if(!t)return `<div class="scroll">${backBtn()}<h1>Reçu introuvable</h1></div>`;
+   return `<div class="scroll">${backBtn()}<h1>Reçu</h1><p class="sub">Référence ${esc(t.ref||'-')}</p><div class="sum"><div><span>Date</span><b>${esc(t.date)}</b></div><div><span>Destinataire</span><b style="text-align:right;overflow-wrap:anywhere">${esc(t.to)}</b></div><div><span>Réseau</span><b>${esc(t.net)}</b></div><div><span>Montant</span><b>${fcfa(t.amount)}</b></div><div><span>Frais</span><b>${fcfa(t.fee||0)}</b></div><div><span>Total</span><b>${fcfa(t.amount+(t.fee||0))}</b></div></div><p class="hint">Mode test : aucun argent réel n'a été déplacé.</p></div>`}
+},
+me:{
+  render:()=>{const P=S.profile;return `<div class="scroll">${backBtn()}<h1>Mon compte</h1><p class="sub">Vos informations personnelles.</p>
+   <div class="sum"><div><span>Nom</span><b>${esc(P.fn+' '+P.ln)}</b></div><div><span>Téléphone</span><b>${HOME.dial} ${esc(S.phone)}</b></div><div><span>E-mail</span><b style="text-align:right;overflow-wrap:anywhere">${esc(P.em)}</b></div><div><span>Naissance</span><b>${esc(P.bd)}</b></div><div><span>Identité</span><b>${S.verified?'Vérifiée':'Non vérifiée'}</b></div><div><span>Limite d'envoi</span><b>${fcfa(limit())}</b></div></div>
+   ${S.verified?'':'<button class="btn" data-go="kyc" style="margin-bottom:12px">Vérifier mon identité</button>'}
+   <button class="btn ghost" id="lo" style="margin-bottom:12px">Se déconnecter</button><button class="btn ghost" id="del" style="color:var(--danger)">Supprimer mon compte</button></div>`},
+  bind(){bindGo();root.querySelector('#lo').onclick=()=>reset('login');twoTap(root.querySelector('#del'),'Touchez encore pour confirmer',()=>{resetAll();reset('phone')})}
+},
+kyc:{
+  render:()=>`<div class="scroll">${backBtn()}<h1>Vérifier mon identité</h1><p class="sub">Pour envoyer jusqu'à ${fcfa(MAX_V)} par opération.</p>
+   <div class="fld"><span class="lb" id="dl">Type de pièce</span><div class="list" id="docs" role="radiogroup" aria-labelledby="dl"></div></div>
+   <div class="fld"><label class="lb" for="kn">Numéro de la pièce</label><input class="in" id="kn" autocomplete="off"></div>
+   <div class="fld"><label class="lb" for="f1">Photo de la pièce</label><input class="in" type="file" id="f1" accept="image/*" style="padding-top:14px;font-size:14px"></div>
+   <div class="fld"><label class="lb" for="f2">Selfie</label><input class="in" type="file" id="f2" accept="image/*" style="padding-top:14px;font-size:14px"></div>
+   <p class="hint">Mode test : les photos ne sont pas envoyées et la vérification est acceptée tout de suite.</p></div>${foot('Envoyer')}`,
+  bind(){const K=S.kyc,d=root.querySelector('#docs'),n=root.querySelector('#kn');n.value=K.num;
+    const ok=()=>setNext(!!K.doc&&K.num.trim().length>=5&&K.f1&&K.f2);
+    const draw=()=>{d.innerHTML=['Carte nationale d\'identité','Passeport','Permis de conduire'].map(x=>`<button class="cty" role="radio" aria-checked="${K.doc===x}" data-d="${esc(x)}">${esc(x)}<span class="radio"></span></button>`).join('');ok()};
+    d.addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b){K.doc=b.dataset.d;draw()}});
+    n.oninput=()=>{K.num=n.value;ok()};
+    root.querySelector('#f1').onchange=e=>{K.f1=e.target.files.length>0;ok()};root.querySelector('#f2').onchange=e=>{K.f2=e.target.files.length>0;ok()};draw()},
+  next(){S.verified=true;save();S.kyc={doc:'',num:'',f1:false,f2:false};S.done={title:'Identité vérifiée',text:'Votre limite est maintenant de '+fcfa(MAX_V)+' par opération. Mode test : la vérification est simulée.',tab:'home'};go('done')}
+},
+giftbuy:{
+  render:()=>`<div class="scroll">${backBtn()}<h1>Carte cadeau de ${fcfa(S.gamt)}</h1><p class="sub">Vous recevez un code à transmettre à la personne.</p>
+   <div class="fld"><label class="lb" for="gn">Pour qui ?</label><input class="in" id="gn" autocomplete="off" placeholder="Nom du bénéficiaire"></div>
+   <label class="lb" for="gp">Entrez votre code PIN pour payer</label>${boxes('gp',true)}<div class="err" role="alert"></div></div>${foot('Payer')}`,
+  bind(){S.cp='';S.gname=S.gname||'';const g=root.querySelector('#gn');g.value=S.gname;
+    const ok=()=>setNext(S.gname.trim().length>1&&S.cp.length===5);g.oninput=()=>{S.gname=g.value;ok()};
+    bindBoxes('gp',()=>S.cp,v=>S.cp=v,()=>{setErr('');ok()});ok()},
+  next(){if(S.cp!==S.pin1){setErr('Code PIN incorrect.');return}
+    const d=new Date().toLocaleDateString('fr-FR'),code=genCode(),to=S.gname.trim();
+    S.gifts.unshift({amt:S.gamt,to,code,date:d});
+    S.tx.unshift({cc:'GC',to:'Carte cadeau pour '+to,date:d,net:'AK Pay',amount:S.gamt,fee:0,ref:'AK'+Date.now().toString().slice(-8)});
+    save();S.done={title:'Carte cadeau créée',text:'Code à transmettre : '+code+'. Mode test : la carte n\'a aucune valeur réelle.',tab:'gift'};S.gname='';go('done')}
+},
+done:{
+  render:()=>`<div class="ok"><span class="bdg" style="width:88px;height:88px;background:var(--brand);color:var(--on-brand)">${ic.check}</span><h1 style="margin:8px 0 0">${esc(S.done.title)}</h1><p class="sub" style="max-width:300px;margin:0;overflow-wrap:anywhere">${esc(S.done.text)}</p></div>
+   <div class="foot"><button class="btn" data-home>Retour</button></div>`,
+  bind(){root.querySelector('[data-home]').onclick=()=>{S.tab=S.done.tab;reset('home')}}
+},
+success:{
+  render:()=>`<div class="ok"><span class="bdg" style="width:88px;height:88px;background:var(--brand);color:var(--on-brand)">${ic.check}</span><h1 style="margin:8px 0 0">Transfert envoyé</h1>
+   <p class="sub" style="max-width:280px;margin:0">${fcfa(S.amount)} vers ${esc(S.rname)} au ${esc(S.dest.name)}. Mode test : aucun argent réel n'a été déplacé.</p></div>
+   <div class="foot"><button class="btn" data-home>Retour à l'accueil</button></div>`,
+  bind(){S.amount=0;S.rname='';S.rphone='';S.dest=null;root.querySelector('[data-home]').onclick=()=>{S.tab='home';reset('home')}}
+}};
+
+function show(){
+  clearInterval(S.tmr);
+  const sc=screens[cur()];
+  root.innerHTML=sc.render();
+  const b=root.querySelector('[data-back]');if(b)b.onclick=back;
+  const n=root.querySelector('[data-next]');if(n)n.onclick=()=>sc.next();
+  sc.bind&&sc.bind();
+}
+// Bouton de thème (clair / sombre / système)
+const themeBtn=document.createElement('button');
+themeBtn.className='theme back';themeBtn.setAttribute('aria-label','Changer le thème');themeBtn.style.cssText='min-width:44px;justify-content:center;color:var(--muted)';
+themeBtn.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>';
+themeBtn.onclick=()=>{const r=document.documentElement,d=r.getAttribute('data-theme');
+  r.setAttribute('data-theme',d==='dark'?'light':(d==='light'?'dark':(matchMedia('(prefers-color-scheme: dark)').matches?'light':'dark')))};
+document.querySelector('.app').appendChild(themeBtn);
+if(load())S.stack=['login'];
+show();
+window.__akpay={S,screens};
+})();
+</script>
